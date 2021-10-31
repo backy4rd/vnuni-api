@@ -1,0 +1,28 @@
+{
+  "name": "vnuni",
+  "version": "1.0.0",
+  "description": "vnuni",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/backy4rd/vnuni-backend.git"
+  },
+  "keywords": [
+    "map"
+  ],
+  "author": "backy4rd",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/backy4rd/vnuni-backend/issues"
+  },
+  "homepage": "https://github.com/backy4rd/vnuni-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "knex": "^0.95.12",
+    "tedious": "^14.0.0"
+  }
+}
