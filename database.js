@@ -3,9 +3,9 @@ const knex = require('knex');
 module.exports = knex({
   client: 'mssql',
   connection: {
-      user: 'sa',
-      password: 'Password1',
-      database: 'vnuni',
+      user: process.env.DB_USER || 'sa',
+      password: process.env.DB_PASSWORD || 'password',
+      database: process.env.DB_NAME || 'vnuni',
       host: 'localhost',
       port: 1433,
       options: {

@@ -5,22 +5,22 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    let builder = db
+    let query = db
       .select('*', 'toado.STY AS lat', 'toado.STX AS long')
       .from('truong');
 
     if (true) {
-      builder = builder.innerJoin('nhom', 'truong.id_nhom', 'nhom.id_nhom');
-      builder = builder.innerJoin('tinh', 'truong.id_tinh', 'tinh.id_tinh');
+      query = query.innerJoin('nhom', 'truong.id_nhom', 'nhom.id_nhom');
+      query = query.innerJoin('tinh', 'truong.id_tinh', 'tinh.id_tinh');
     }
 
     res.status(200).json({
-      type: 'truong DH',
-      features: (await builder).map((r) => ({
+      type: 'FeatureCollection',
+      features: (await query).map((r) => ({
         type: 'Feature',
         geometry: {
-          type: 'point',
-          coordinates: [r.long, r.lat],
+          type: 'Point',
+          coordinates: [r.lat, r.long],
         },
         properties: {
           tentruong: r.tentruong,
