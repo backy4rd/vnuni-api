@@ -8,7 +8,18 @@ router.get('/', async (req, res) => {
 
   try {
     let query = db
-      .select('*', 'toado.STY AS lat', 'toado.STX AS long')
+      .select(
+        'truong.id_truong',
+        'truong.tentruong',
+        'toado.STY AS lat',
+        'toado.STX AS long',
+        'mien.id_mien',
+        'mien.ten_mien',
+        'nhom.id_nhom',
+        'nhom.ten_nhom',
+        'tinh.id_tinh',
+        'tinh.ten_tinh',
+      )
       .innerJoin('nhom', 'nhom.id_nhom', 'truong.id_nhom')
       .innerJoin('tinh', 'tinh.id_tinh', 'truong.id_tinh')
       .innerJoin('mien', 'mien.id_mien', 'tinh.id_mien')
@@ -47,7 +58,7 @@ router.get('/', async (req, res) => {
       })),
     };
 
-    res.status(200).json(geojson);
+    res.status(200).json({ data, geojson });
   } catch (e) {
     console.log(e);
     res.status(400).end();
