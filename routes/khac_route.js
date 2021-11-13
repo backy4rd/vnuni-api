@@ -1,6 +1,6 @@
 const express = require("express");
 const db = require("../database.js");
-const { convertToSTGeomFromTextValue } = require("../helpers.js");
+const { convertToSTGeomFromText } = require("../helpers.js");
 
 const router = express.Router();
 
@@ -39,12 +39,16 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ fail: "coordination không hợp lệ, Array only" });
   }
 
-  let STGeomFromText = convertToSTGeomFromTextValue(type, coordinates);
+  let STGeomFromText = convertToSTGeomFromText(type, coordinates);
 
   try {
+    const [{ valid }] = await db.select(db.raw(`${STGeomFromText}.STIsValid() AS valid`));
+    if (!valid) throw new Error();
+
+    console.log(STGeomFromText)
     const data = await db
       .insert({
-        toado: db.raw(`geometry::STGeomFromText('${STGeomFromText}', 0)`),
+        toado: db.raw(STGeomFromText),
         mota: mota,
       })
       .into("khac")
@@ -63,6 +67,9 @@ router.put("/:id(\\d+)", async (req, res) => {
   const { id } = req.params;
   const { coordinates, mota } = req.body;
 
+  if (!coordinates && !mota) {
+    return res.status(400).json({ fail: "cần có ít nhất 1 tham số (coordinates hoặc mota)" });
+  }
   if (coordinates && !Array.isArray(coordinates)) {
     return res.status(400).json({ fail: "coordination không hợp lệ, Array only" });
   }
@@ -78,12 +85,12 @@ router.put("/:id(\\d+)", async (req, res) => {
   }
 
   let STGeomFromText =
-    coordinates && convertToSTGeomFromTextValue(JSON.parse(item.geometry).type, coordinates);
+    coordinates && convertToSTGeomFromText(JSON.parse(item.geometry).type, coordinates);
 
   try {
     const rowAffected = await db("khac")
       .update({
-        toado: STGeomFromText && db.raw(`geometry::STGeomFromText('${STGeomFromText}', 0)`),
+        toado: STGeomFromText && db.raw(STGeomFromText),
         mota: mota,
       })
       .where("id", id);

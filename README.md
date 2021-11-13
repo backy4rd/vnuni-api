@@ -109,7 +109,7 @@ Array<{
   - coordinates (required):
     - type = Point: [number, number]
     - type = LineString: Array<[number, number]>
-    - type = Polygon: Array<[number, number]>, tọa độ cuối trùng tọa độ đầu
+    - type = Polygon: Array<Array<[number, number]>>
   - mota (optional): mô tả
 - response:
 ```
@@ -121,12 +121,12 @@ Array<{
 
 ## PUT /khac/:id (sửa)
 
-- request body (json):
-  - coordinates (optinal):
+- request body (json) (at least 1 property):
+  - coordinates:
     - type = Point: [number, number]
     - type = LineString: Array<[number, number]>
-    - type = Polygon: Array<[number, number]>, tọa độ cuối trùng tọa độ đầu
-  - mota (optional): mô tả
+    - type = Polygon: Array<Array<[number, number]>>
+  - mota: mô tả
 - response: NOTHING
 
 ## DELETE /khac/:id (xóa)

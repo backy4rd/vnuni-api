@@ -1,10 +1,19 @@
-module.exports.convertToSTGeomFromTextValue = (type, coordinates) => {
+module.exports.convertToSTGeomFromText = (type, coordinates) => {
+  let STGeomFromText;
   switch (type) {
     case "Point":
-      return `POINT (${coordinates.join(" ")})`;
+      STGeomFromText = `POINT (${coordinates.join(" ")})`;
+      break;
     case "Polygon":
-      return `POLYGON ((${coordinates.map((c) => c.join(" ")).join(", ")}))`;
+      STGeomFromText = `POLYGON (${coordinates
+        .map((poly) => poly.map((c) => c.join(" ")).join(", "))
+        .map((poly) => `(${poly})`)
+        .join(", ")})`;
+      break;
     case "LineString":
-      return `LINESTRING (${coordinates.map((c) => c.join(" ")).join(", ")})`;
+      STGeomFromText = `LINESTRING (${coordinates.map((c) => c.join(" ")).join(", ")})`;
+      break;
   }
+
+  return STGeomFromText && `geometry::STGeomFromText('${STGeomFromText}', 0)`;
 };
