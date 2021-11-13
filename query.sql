@@ -1,3 +1,4 @@
+DROP DATABASE vnuni; 
 CREATE DATABASE vnuni;
 go
 USE vnuni;
@@ -5,14 +6,14 @@ go
 
 CREATE TABLE mien
 (
-    id_mien int PRIMARY KEY,
+    id_mien int IDENTITY(1,1) PRIMARY KEY,
     ten_mien nvarchar(255)
 )
 go
 
 CREATE TABLE tinh
 (
-    id_tinh int PRIMARY KEY,
+    id_tinh int IDENTITY(1,1) PRIMARY KEY,
     ten_tinh nvarchar(255),
     id_mien int,
     FOREIGN KEY (id_mien) REFERENCES mien(id_mien)
@@ -20,14 +21,14 @@ CREATE TABLE tinh
 go
 CREATE TABLE nhom
 (
-    id_nhom int PRIMARY KEY,
+    id_nhom int IDENTITY(1,1) PRIMARY KEY,
     ten_nhom nvarchar(255)
 )
 go
 
 CREATE TABLE truong
 (
-    id_truong int PRIMARY KEY,
+    id_truong int IDENTITY(1,1) PRIMARY KEY,
     tentruong nvarchar(255),
     toado geometry,
     id_tinh int,
@@ -36,11 +37,21 @@ CREATE TABLE truong
     FOREIGN KEY (id_nhom) REFERENCES nhom(id_nhom)
 )
 
+CREATE TABLE khac
+(
+    id int IDENTITY(1,1) PRIMARY KEY,
+    mota nvarchar(2000),
+    toado geometry,
+)
 
+
+SET IDENTITY_INSERT mien ON
 INSERT INTO mien(id_mien,ten_mien) VALUES (1, N'Miền Bắc');
 INSERT INTO mien(id_mien,ten_mien) VALUES (2, N'Miền Trung');
 INSERT INTO mien(id_mien,ten_mien) VALUES (3, N'Miền Nam');
+SET IDENTITY_INSERT mien OFF
 
+SET IDENTITY_INSERT tinh ON
 INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (1, N'An Giang', 3);
 INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (2, N'Bà Rịa - Vũng Tàu', 3);
 INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (3, N'Bạc Liêu', 3);
@@ -104,7 +115,9 @@ INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (60, N'Tuyên Quang', 1);
 INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (61, N'Vĩnh Long', 3);
 INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (62, N'Vĩnh Phúc', 1);
 INSERT INTO tinh(id_tinh,ten_tinh,id_mien) VALUES (63, N'Yên Bái', 1);
+SET IDENTITY_INSERT tinh OFF
 
+SET IDENTITY_INSERT nhom ON
 INSERT INTO nhom(id_nhom,ten_nhom) VALUES (1, N'Đại học Quốc gia Hà Nội');
 INSERT INTO nhom(id_nhom,ten_nhom) VALUES (2, N'Đại học Thái Nguyên');
 INSERT INTO nhom(id_nhom,ten_nhom) VALUES (3, N'Đại học Huế');
@@ -137,7 +150,9 @@ INSERT INTO nhom(id_nhom,ten_nhom) VALUES (29, N'Đại học tư thục');
 INSERT INTO nhom(id_nhom,ten_nhom) VALUES (30, N'Quân sự');
 INSERT INTO nhom(id_nhom,ten_nhom) VALUES (31, N'Công an');
 INSERT INTO nhom(id_nhom,ten_nhom) VALUES (32, N'Trường dự bị đại học, dự bị đại học dân tộc');
+SET IDENTITY_INSERT nhom OFF
 
+SET IDENTITY_INSERT truong ON
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (1, 24, 1, N'Đại học Quốc gia Hà Nội', geometry::STGeomFromText ('POINT (21.037875443070963 105.78161757606023)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (2, 24, 1, N'Đại học Công nghệ', geometry::STGeomFromText ('POINT (21.038467585863373 105.78276154755538)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (3, 24, 1, N'Đại học Giáo dục', geometry::STGeomFromText ('POINT (21.038685912882684 105.78147414786785)', 0));
@@ -428,3 +443,262 @@ INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (287, 30, 3
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (288, 44, 32, N'Trường Dự bị Đại học dân tộc Trung ương Việt Trì - Phú Thọ', geometry::STGeomFromText ('POINT (21.324094491600206 105.4026017337594)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (289, 56, 32, N'Trường Dự bị Đại học dân tộc Sầm Sơn', geometry::STGeomFromText ('POINT (19.742840732033628 105.90265293961623)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (290, 32, 32, N'Trường Dự bị Đại học dân tộc Nha Trang', geometry::STGeomFromText ('POINT (12.235554671384204 109.19399096767242)', 0));
+SET IDENTITY_INSERT truong OFF
+GO
+
+CREATE FUNCTION [dbo].[geomToGeoJSON] (@geom GEOMETRY)
+RETURNS VARCHAR(MAX)
+AS
+BEGIN
+-- Declare the return variable here
+    DECLARE @geoJSON VARCHAR(MAX)
+
+
+    DECLARE @Ngeom GEOMETRY
+    DECLARE @ptCounter INT
+    DECLARE @numPt INT
+    DECLARE @ringCounter INT
+    DECLARE @numRing INT
+    DECLARE @gCounter INT
+    DECLARE @numGeom INT
+    DECLARE @handled BIT = 0
+    DECLARE @extRing GEOMETRY
+    DECLARE @intRing GEOMETRY
+
+    -- fix bad geometries and enforce ring orientation
+    SET @geom = @geom.STUnion(@geom.STPointN(1)).MakeValid()
+
+    -- Point ----------------------------
+    IF (@geom.STGeometryType() = 'Point')
+    BEGIN
+        SET @geoJSON = '{ "type": "Point", "coordinates": [' + LTRIM(RTRIM(STR(@geom.STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@geom.STY, 38, 8))) + '] }'
+        SET @handled = 1
+    END
+
+
+    -- MultiPoint ---------------------------------------------
+    IF (
+        @handled = 0
+        AND @geom.STGeometryType() = 'MultiPoint'
+        )
+    BEGIN
+        SET @gCounter = 1
+        SET @numGeom = @geom.STNumGeometries()
+
+        SET @geoJSON = '{ "type": "MultiPoint", "coordinates": ['
+
+        WHILE @gCounter <= @numGeom
+        BEGIN
+            SET @geoJSON += '[' + LTRIM(RTRIM(STR(@geom.STGeometryN(@gCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@geom.STGeometryN(@gCounter).STY, 38, 8))) + '], '
+            SET @gCounter += 1
+        END
+
+        SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + '] }'
+        SET @handled = 1
+    END
+
+
+
+
+    -- LineString ---------------------------------------------
+    IF (
+        @handled = 0
+        AND @geom.STGeometryType() = 'LineString'
+        )
+    BEGIN
+        SET @ptCounter = 1
+        SET @numPt = @geom.STNumPoints()
+
+        SET @geoJSON = '{ "type": "LineString", "coordinates": ['
+
+        WHILE @ptCounter <= @numPt
+        BEGIN
+            SET @geoJSON += '[' + LTRIM(RTRIM(STR(@geom.STPointN(@ptCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@geom.STPointN(@ptCounter).STY, 38, 8))) + '], '
+            SET @ptCounter += 1
+        END
+
+        SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + ' ] }'
+        SET @handled = 1
+    END
+
+
+
+
+    -- MultiLineString ---------------------------------------------
+    IF (
+        @handled = 0
+        AND @geom.STGeometryType() = 'MultiLineString'
+        )
+    BEGIN
+        SET @gCounter = 1
+        SET @numGeom = @geom.STNumGeometries()
+
+        SET @geoJSON = '{ "type": "MultiLineString", "coordinates": ['
+
+        WHILE @gCounter <= @numGeom
+        BEGIN
+            SET @Ngeom = @geom.STGeometryN(@gCounter)
+            SET @geoJSON += '['
+            SELECT
+                @ptCounter = 1
+                ,@numPt = @Ngeom.STNumPoints()
+
+            WHILE @ptCounter <= @numPt
+            BEGIN
+                SET @geoJSON += '[' + LTRIM(RTRIM(STR(@Ngeom.STPointN(@ptCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@Ngeom.STPointN(@ptCounter).STY, 38, 8))) + '], '
+                SET @ptCounter += 1
+            END
+
+            SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + '],'
+
+            SET @gCounter += 1
+        END
+
+        SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + '] }'
+        SET @handled = 1
+    END
+
+
+
+
+    -- Polygon ---------------------------------------------
+    IF (
+        @handled = 0
+        AND @geom.STGeometryType() = 'Polygon'
+        )
+    BEGIN
+        SET @extRing = @geom.STExteriorRing()
+
+        SET @geoJSON = '{ "type": "Polygon", "coordinates": [['
+
+        SELECT
+            @ptCounter = 1
+            ,@numPt = @extRing.STNumPoints()
+
+        WHILE @ptCounter <= @numPt
+        BEGIN
+            SET @geoJSON += '[' + LTRIM(RTRIM(STR(@extRing.STPointN(@ptCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@extRing.STPointN(@ptCounter).STY, 38, 8))) + '], '
+            SET @ptCounter += 1
+        END
+
+        SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + ']'
+
+        SET @ringCounter = 1
+        SET @numRing = @geom.STNumInteriorRing()
+
+        WHILE @ringCounter <= @numRing
+        BEGIN
+            SET @geoJSON += ',['
+
+            SET @intRing = @geom.STInteriorRingN(@ringCounter)
+            -- set the ring orientation so that they are consistent
+            SET @intRing = @intRing.STUnion(@intRing.STPointN(1)).MakeValid()
+
+            SELECT
+                @ptCounter = @intRing.STNumPoints()
+
+            WHILE @ptCounter > 0
+            BEGIN
+                SET @geoJSON += '[' + LTRIM(RTRIM(STR(@intRing.STPointN(@ptCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@intRing.STPointN(@ptCounter).STY, 38, 8))) + '], '
+                SET @ptCounter -= 1
+            END
+
+            SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + ']'
+
+            SET @ringCounter += 1
+        END
+
+        SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + ']] }'
+        SET @handled = 1
+    END
+
+
+
+
+    -- MultiPolygon ---------------------------------------------
+    IF (
+        @handled = 0
+        AND @geom.STGeometryType() = 'MultiPolygon'
+        )
+    BEGIN
+        SELECT
+            @gCounter = 1
+            ,@numGeom = @geom.STNumGeometries()
+
+        SET @geoJSON = '{ "type": "MultiPolygon", "coordinates": ['
+
+        WHILE @gCounter <= @numGeom
+        BEGIN
+            SET @Ngeom = @geom.STGeometryN(@gCounter)
+
+            SET @extRing = @Ngeom.STExteriorRing()
+
+            SET @geoJSON += '[['
+
+            SELECT
+                @ptCounter = 1
+                ,@numPt = @extRing.STNumPoints()
+
+            -- add the exterior ring points to the json
+            WHILE @ptCounter <= @numPt
+            BEGIN
+                SET @geoJSON += '[' + LTRIM(RTRIM(STR(@extRing.STPointN(@ptCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@extRing.STPointN(@ptCounter).STY, 38, 8))) + '], '
+                SET @ptCounter += 1
+            END
+
+            SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + ']'
+
+            SET @ringCounter = 1
+            SET @numRing = @Ngeom.STNumInteriorRing()
+
+            -- add any internal ring points to the json
+            WHILE @ringCounter <= @numRing
+            BEGIN
+                SET @geoJSON += ',['
+
+                SET @intRing = @Ngeom.STInteriorRingN(@ringCounter)
+                -- make sure the ring orientation is the same every time
+                SET @intRing = @intRing.STUnion(@intRing.STPointN(1)).MakeValid()
+
+                SELECT
+                    @ptCounter = @intRing.STNumPoints()
+
+                WHILE @ptCounter > 0
+                BEGIN
+                    SET @geoJSON += '[' + LTRIM(RTRIM(STR(@intRing.STPointN(@ptCounter).STX, 38, 8))) + ', ' + LTRIM(RTRIM(STR(@intRing.STPointN(@ptCounter).STY, 38, 8))) + '], '
+                    SET @ptCounter -= 1
+                END
+
+                SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + ']'
+
+                SET @ringCounter += 1
+            END
+
+
+
+            SET @geoJSON += '],'
+            SET @gCounter += 1
+        END
+
+        SET @geoJSON = LEFT(@geoJSON, LEN(@geoJSON) - 1) + '] }'
+        SET @handled = 1
+    END
+
+
+
+
+
+
+    IF (@handled = 0)
+    BEGIN
+        SET @geoJSON = '{"type": "' + @geom.STGeometryType() + '", "coordinates": []}'
+    END
+
+
+
+
+    RETURN @geoJSON
+
+
+
+END

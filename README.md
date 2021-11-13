@@ -8,7 +8,7 @@
 
 ## GET /truong
 
-- query params:
+- request query params:
   - truong: lọc theo tên trường.
   - nhom: lọc theo tên nhóm.
   - tinh: lọc theo tên tỉnh.
@@ -82,6 +82,55 @@ Array<{
     ten_mien: string,
 }>
 ```
+
+## GET /khac
+
+```
+{
+    type: "FeatureCollection",
+    features: Array<{
+        type: "Feature",
+        geometry: {
+            type: "Point" | "Polygon" | "LineString",
+            coordinates: ICoordinate<"Point" | "Polygon" | "LineString">
+        },
+        properties: {
+            id: number,
+            mota: string,
+        }
+    }>
+}
+```
+
+## POST /khac (tạo)
+
+- request body (json):
+  - type (required): Point hoặc Polygon hoặc LineString
+  - coordinates (required):
+    - type = Point: [number, number]
+    - type = LineString: Array<[number, number]>
+    - type = Polygon: Array<[number, number]>, tọa độ cuối trùng tọa độ đầu
+  - mota (optional): mô tả
+- response:
+```
+{
+    id: number,
+    mota: string | null
+}
+```
+
+## PUT /khac/:id (sửa)
+
+- request body (json):
+  - coordinates (optinal):
+    - type = Point: [number, number]
+    - type = LineString: Array<[number, number]>
+    - type = Polygon: Array<[number, number]>, tọa độ cuối trùng tọa độ đầu
+  - mota (optional): mô tả
+- response: NOTHING
+
+## DELETE /khac/:id (xóa)
+- response: NOTHING
 
 ## License
 

@@ -18,6 +18,9 @@
   "bugs": {
     "url": "https://github.com/backy4rd/vnuni-backend/issues"
   },
+  "prettier": {
+    "printWidth": 100
+  },
   "homepage": "https://github.com/backy4rd/vnuni-backend#readme",
   "dependencies": {
     "cors": "^2.8.5",
