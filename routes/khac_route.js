@@ -39,13 +39,12 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ fail: "coordination không hợp lệ, Array only" });
   }
 
-  let STGeomFromText = convertToSTGeomFromText(type, coordinates);
-
   try {
+    const STGeomFromText = convertToSTGeomFromText(type, coordinates);
     const [{ valid }] = await db.select(db.raw(`${STGeomFromText}.STIsValid() AS valid`));
     if (!valid) throw new Error();
 
-    console.log(STGeomFromText)
+    console.log(STGeomFromText);
     const data = await db
       .insert({
         toado: db.raw(STGeomFromText),
@@ -84,10 +83,9 @@ router.put("/:id(\\d+)", async (req, res) => {
     return res.status(400).json({ fail: "đối tượng không tồn tại" });
   }
 
-  let STGeomFromText =
-    coordinates && convertToSTGeomFromText(JSON.parse(item.geometry).type, coordinates);
-
   try {
+    const STGeomFromText =
+      coordinates && convertToSTGeomFromText(JSON.parse(item.geometry).type, coordinates);
     const rowAffected = await db("khac")
       .update({
         toado: STGeomFromText && db.raw(STGeomFromText),
