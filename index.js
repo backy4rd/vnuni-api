@@ -10,6 +10,7 @@ const tinhRoute = require('./routes/tinh_route');
 const mienRoute = require('./routes/mien_route');
 const nhomRoute = require('./routes/nhom_route');
 const khacRoute = require('./routes/khac_route');
+const taikhoanRoute = require('./routes/taikhoan_route');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/tinh', tinhRoute);
 app.use('/mien', mienRoute);
 app.use('/nhom', nhomRoute);
 app.use('/khac', khacRoute);
+app.use('/taikhoan', taikhoanRoute);
 
 app.listen(8000, (e) => {
   if (e) return console.log(e);

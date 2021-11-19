@@ -1,3 +1,4 @@
+USE test;
 DROP DATABASE vnuni; 
 CREATE DATABASE vnuni;
 go
@@ -7,31 +8,32 @@ go
 CREATE TABLE mien
 (
     id_mien int IDENTITY(1,1) PRIMARY KEY,
-    ten_mien nvarchar(255)
+    ten_mien nvarchar(255) not null
 )
 go
 
 CREATE TABLE tinh
 (
     id_tinh int IDENTITY(1,1) PRIMARY KEY,
-    ten_tinh nvarchar(255),
-    id_mien int,
+    ten_tinh nvarchar(255) not null,
+    id_mien int not null,
     FOREIGN KEY (id_mien) REFERENCES mien(id_mien)
 )
 go
 CREATE TABLE nhom
 (
     id_nhom int IDENTITY(1,1) PRIMARY KEY,
-    ten_nhom nvarchar(255)
+    ten_nhom nvarchar(255) not null
 )
 go
 
 CREATE TABLE truong
 (
     id_truong int IDENTITY(1,1) PRIMARY KEY,
-    tentruong nvarchar(255),
-    toado geometry,
-    id_tinh int,
+    tentruong nvarchar(255) not null,
+    toado geometry not null,
+    mo_ta nvarchar(2000),
+    id_tinh int not null,
     id_nhom int,
     FOREIGN KEY (id_tinh) REFERENCES tinh(id_tinh),
     FOREIGN KEY (id_nhom) REFERENCES nhom(id_nhom)
@@ -44,6 +46,29 @@ CREATE TABLE khac
     toado geometry,
 )
 
+CREATE TABLE quyen
+(
+    id_quyen int IDENTITY(1,1) PRIMARY KEY,
+    ten_quyen varchar(64) not null
+)
+
+CREATE TABLE nguoidung
+(
+    username varchar(64) PRIMARY KEY,
+    password varchar(128) not null,
+    ho varchar(64),
+    ten varchar(64) not null,
+
+    id_quyen int not null,
+    FOREIGN key (id_quyen) REFERENCES quyen(id_quyen)
+)
+
+SET IDENTITY_INSERT quyen ON
+INSERT INTO quyen(id_quyen, ten_quyen) VALUES (1, N'user');
+INSERT INTO quyen(id_quyen, ten_quyen) VALUES (2, N'admin');
+SET IDENTITY_INSERT quyen OFF
+
+INSERT INTO nguoidung values ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', null, 'admin', 2)
 
 SET IDENTITY_INSERT mien ON
 INSERT INTO mien(id_mien,ten_mien) VALUES (1, N'Miền Bắc');
@@ -212,7 +237,7 @@ INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (56, 24, 10
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (57, 24, 9, N'Đại học Công nghiệp Dệt may Hà Nội', geometry::STGeomFromText ('POINT (21.03768299184331 106.0116967442411)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (58, 24, 9, N'Đại học Công nghiệp Hà Nội', geometry::STGeomFromText ('POINT (21.053926972781575 105.7351449683185)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (59, 49, 9, N'Đại học Công nghiệp Quảng Ninh', geometry::STGeomFromText ('POINT (21.060674274801787 106.62358772123788)', 0));
-INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (60, 30, 11, N'Đại học Công nghiệp Thành phố Hồ Chí Minh', geometry::STGeomFromText ('POINT (10.822507245549557, 106.68739715684328)', 0));
+INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (60, 30, 11, N'Đại học Công nghiệp Thành phố Hồ Chí Minh', geometry::STGeomFromText ('POINT (10.822507245549557 106.68739715684328)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (61, 30, 9, N'Đại học Công nghiệp Thực phẩm Thành phố Hồ Chí Minh', geometry::STGeomFromText ('POINT (10.80671501696842 106.62896399010368)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (62, 44, 9, N'Đại học Công nghiệp Việt Trì', geometry::STGeomFromText ('POINT (21.31611157829421 105.40042405548319)', 0));
 INSERT INTO truong(id_truong,id_tinh,id_nhom,tentruong,toado) VALUES (63, 2, 9, N'Đại học Dầu khí Việt Nam', geometry::STGeomFromText ('POINT (10.486967529502666 107.19356358751321)', 0));
