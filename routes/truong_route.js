@@ -72,7 +72,7 @@ router.get("/", async (req, res) => {
 router.post("/", helpers.authorizeMiddleware, async (req, res) => {
   const { ten_truong, coordinates, mo_ta, id_nhom } = req.body;
 
-  if (req.auth.role !== 'admin') {
+  if (req.auth.role !== "admin") {
     return res.status(400).json({ fail: "khong co quyen them truong" });
   }
   if (!ten_truong || !coordinates) {
@@ -93,9 +93,9 @@ router.post("/", helpers.authorizeMiddleware, async (req, res) => {
   }
 
   try {
-    let STGeomFromText = helpers.convertToSTGeomFromText('Point', coordinates);
+    let STGeomFromText = helpers.convertToSTGeomFromText("Point", coordinates);
 
-    const data = await db('truong')
+    const data = await db("truong")
       .insert({
         tentruong: ten_truong,
         toado: db.raw(STGeomFromText),
@@ -114,14 +114,63 @@ router.post("/", helpers.authorizeMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/:id(\\d+)", async (req, res) => {
+router.delete("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
   const { id } = req.params;
+
+  if (req.auth.role !== "admin") {
+    return res.status(400).json({ fail: "khong co quyen them truong" });
+  }
 
   const rowAffected = await db("truong").where("id_truong", id).del();
   if (rowAffected === 0) {
     res.status(404).json({ fail: "đối tượng không tồn tại" });
   } else {
     res.status(200).json({ rowAffected });
+  }
+});
+
+router.put("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { ten_truong, coordinates, mo_ta, id_nhom } = req.body;
+
+  if (req.auth.role !== "admin") {
+    return res.status(400).json({ fail: "khong co quyen them truong" });
+  }
+  if (!ten_truong && !coordinates && !mo_ta && !id_nhom) {
+    return res.status(400).json({ fail: "cần cung cấp tham số ten_truong hoawc coordinates" });
+  }
+  if (
+    coordinates &&
+    (!Array.isArray(coordinates) ||
+      typeof coordinates[0] !== "number" ||
+      typeof coordinates[1] !== "number")
+  ) {
+    return res.status(400).json({ fail: "coordination không hợp lệ [number, number]" });
+  }
+  if (id_nhom && !(await db("nhom").select(1).where("id_nhom", id_nhom))) {
+    return res.status(400).json({ fail: "id_nhom khong hop le" });
+  }
+  if (coordinates && !helpers.searchTinh(coordinates)) {
+    return res.status(400).json({ fail: "khong nham trong dia phan VN" });
+  }
+
+  try {
+    const rowAffected = await db("truong")
+      .update({
+        tentruong: ten_truong,
+        toado: coordinates && db.raw(helpers.convertToSTGeomFromText("Point", coordinates)),
+        mo_ta: mo_ta,
+        id_nhom: id_nhom,
+        id_tinh: coordinates && helpers.searchTinh(coordinates),
+      })
+      .where("id_truong", id);
+
+    res.status(201).json({ rowAffected });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ fail: "coordinate không hợp lệ với type hoặc xuất hiện lỗi ngoài ý muốn" });
   }
 });
 
