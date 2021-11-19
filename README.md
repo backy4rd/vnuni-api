@@ -6,6 +6,34 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
+## POST /taikhoan/dangky
+
+- request body:
+  - username (required): string (5-32 letters, a-z, A-Z. 0-9, _, .)
+  - password (required): string (5-32 letters, only contain non white space characters)
+  - ho (optional): string
+  - ten (required): string
+- response:
+
+```
+{
+    token: string
+}
+```
+
+## POST /taikhoan/dangnhap
+
+- request body:
+  - username (required): string;
+  - password (required): string; 
+- response:
+
+```
+{
+    token: string
+}
+```
+
 ## GET /truong
 
 - request query params:
@@ -41,13 +69,53 @@
                 tentruong: string,
                 tennhom: string,
                 tentinh: string,
-                tenmien: string
+                tenmien: string,
+                id_nhom: number,
+                id_tinh: number
             }
         }>
 
     }
 }
 ```
+
+## POST /truong (admin only)
+
+- request headers:
+  - Authorization: <token>
+- request body (json):
+  - ten_truong (required): string
+  - coordinates (required): [number, number]
+  - mo_ta (optional): string
+  - id_nhom (optional): number
+- response (geojson)
+
+```
+{
+    id_truong: number,
+    tentruong: string,
+    mo_ta: string | null
+    id_nhom: number | null,
+    id_tinh: number,
+}
+```
+
+## PUT /truong/:id (admin only)
+
+- request headers:
+  - Authorization: <token>
+- request body (json) (at least 1 field):
+  - ten_truong: string
+  - coordinates: [number, number]
+  - mo_ta: string
+  - id_nhom: number
+- response: NOTHING
+
+## DELETE /truong/:id (admin only)
+
+- request headers:
+  - Authorization: <token>
+- response: NOTHING
 
 ## GET /nhom
 

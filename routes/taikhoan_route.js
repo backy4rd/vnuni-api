@@ -33,19 +33,25 @@ router.post("/dangky", async (req, res) => {
       .status(400)
       .json({ fail: "password khong hop le 5 <= (non white space character) <= 32" });
   }
+  if (await db('nguoidung').where('username', username).first()) {
+    return res
+      .status(400)
+      .json({ fail: "tai khoan da ton tai" });
+  }
 
   const hash = crypto.createHash("sha256").update(password).digest("hex");
 
   try {
-    const user = {
+    await db("nguoidung").insert({
       username: username,
       password: hash,
       ho: ho,
       ten: ten,
       id_quyen: USER,
-    };
-    await db("nguoidung").insert(user);
-    res.status(201).json(user);
+    });
+
+    const token = jwt.sign({ username, ho, ten, role: "user" }, JWT_SECRET);
+    res.status(201).json({ token });
   } catch (e) {
     console.log(e);
     res.status(400).end();
@@ -69,6 +75,8 @@ router.post("/dangnhap", async (req, res) => {
       {
         username: user.username,
         role: user.id_quyen === ADMIN ? "admin" : "user",
+        ho: user.ho,
+        ten: user.ten,
       },
       JWT_SECRET
     );
@@ -76,7 +84,7 @@ router.post("/dangnhap", async (req, res) => {
     res.status(201).json({ token });
   } catch (e) {
     console.log(e);
-    res.status(400).end();
+    res.status(500).json({ fail: 'loi may chu'})
   }
 });
 

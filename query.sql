@@ -1,5 +1,3 @@
-USE test;
-DROP DATABASE vnuni; 
 CREATE DATABASE vnuni;
 go
 USE vnuni;

@@ -58,6 +58,8 @@ router.get("/", async (req, res) => {
           tennhom: r.ten_nhom || undefined,
           tentinh: r.ten_tinh || undefined,
           tenmien: r.ten_mien || undefined,
+          id_tinh: r.id_tinh,
+          id_nhom: r.id_nhom
         },
       })),
     };
