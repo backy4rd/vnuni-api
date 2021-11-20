@@ -1,7 +1,5 @@
-const path = require("path");
-const fs = require("fs");
+const _ = require("lodash");
 const express = require("express");
-const turf = require("@turf/turf");
 const db = require("../database.js");
 const helpers = require("../helpers");
 
@@ -22,12 +20,22 @@ router.get("/", async (req, res) => {
         "nhom.id_nhom",
         "nhom.ten_nhom",
         "tinh.id_tinh",
-        "tinh.ten_tinh"
+        "tinh.ten_tinh",
+        "dg.sao"
       )
       .innerJoin("nhom", "nhom.id_nhom", "truong.id_nhom")
       .innerJoin("tinh", "tinh.id_tinh", "truong.id_tinh")
       .innerJoin("mien", "mien.id_mien", "tinh.id_mien")
+      .leftJoin(
+        db("danhgia")
+          .select("id_truong", db.raw("ROUND(AVG(CAST(sao AS FLOAT)), 1) AS sao"))
+          .groupBy("id_truong")
+          .as("dg"),
+        "dg.id_truong",
+        "truong.id_truong"
+      )
       .from("truong");
+    console.log(query.toString());
 
     if (truong) {
       query = query.andWhere("truong.tentruong", "like", `%${truong}%`);
@@ -59,7 +67,8 @@ router.get("/", async (req, res) => {
           tentinh: r.ten_tinh || undefined,
           tenmien: r.ten_mien || undefined,
           id_tinh: r.id_tinh,
-          id_nhom: r.id_nhom
+          id_nhom: r.id_nhom,
+          sao: r.sao,
         },
       })),
     };
@@ -174,6 +183,45 @@ router.put("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
       .status(400)
       .json({ fail: "coordinate không hợp lệ với type hoặc xuất hiện lỗi ngoài ý muốn" });
   }
+});
+
+router.get("/:id(\\d+)/danhgia", async (req, res) => {
+  const { id } = req.params;
+
+  if (!(await db("truong").where("id_truong", id).first())) {
+    return res.status(404).json({ fail: "truong khong ton tai" });
+  }
+  const danhgiasRaw = await db("danhgia")
+    .select(
+      "danhgia.id_danh_gia",
+      "sao",
+      "danh_gia",
+      "created_at",
+      "nguoidung.username",
+      "ho",
+      "ten",
+      "url",
+      "id_hinh"
+    )
+    .innerJoin("nguoidung", "nguoidung.username", "danhgia.username")
+    .leftJoin("hinhanh", "hinhanh.id_danh_gia", "danhgia.id_danh_gia")
+    .where("id_truong", id);
+
+  const danhgias = _.chain(danhgiasRaw)
+    .groupBy((dg) => dg.id_danh_gia)
+    .map((dgs) => ({
+      id_danh_gia: dgs[0].id_danh_gia,
+      sao: dgs[0].sao,
+      danh_gia: dgs[0].danh_gia,
+      created_at: dgs[0].created_at,
+      username: dgs[0].username,
+      ho: dgs[0].ho,
+      ten: dgs[0].ten,
+      hinh_anh: dgs.map((hinh) => ({ url: hinh.url, id_hinh: hinh.id_hinh })),
+    }))
+    .value();
+
+  res.status(200).json(danhgias);
 });
 
 module.exports = router;

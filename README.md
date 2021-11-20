@@ -55,7 +55,8 @@
         id_nhom: number,
         ten_nhom: string,
         id_tinh: number,
-        ten_tinh: string
+        ten_tinh: string,
+        sao: number
     }>,
     geojson: {
         type: "FeatureCollection",
@@ -71,11 +72,31 @@
                 tentinh: string,
                 tenmien: string,
                 id_nhom: number,
-                id_tinh: number
+                id_tinh: number,
+                sao: number
             }
         }>
 
     }
+}
+```
+
+## GET /truong/:id/danhgia
+
+- response
+```
+{
+    id_danh_gia: number,
+    sao: number,
+    danh_gia: string | null,
+    created_at: date-string,
+    username: string,
+    ho: string | null,
+    ten: "string",
+    hinh_anh: Array<{
+        id_hinh: number,
+        url: string
+    }>
 }
 ```
 
@@ -112,6 +133,49 @@
 - response: NOTHING
 
 ## DELETE /truong/:id (admin only)
+
+- request headers:
+  - Authorization: <token>
+- response: NOTHING
+
+## POST /danhgia
+
+- request headers:
+  - Authorization: <token>
+  - Content-Type: 'multipart/form-data'
+- request body:
+  - id_truong (required): number
+  - sao (required): number (0-5)
+  - danh_gia (optional): string
+  - hinh_anh (optional): File | Array<File> (jpg, png only)
+- response (geojson)
+
+```
+{
+    id_danh_gia: number
+    sao: number,
+    danh_gia: string | null
+    username: string,
+    created_at: date-string,
+    id_truong: number,
+    hinh_anh: Array<{
+        id_hinh: number,
+        url: string,
+        id_danh_gia: number
+    }>,
+}
+```
+
+## PUT /danhgia/:id (onwer only)
+
+- request headers:
+  - Authorization: <token>
+- request body (at least one field):
+  - sao: number (0-5)
+  - danh_gia: string
+- response: NOTHING
+
+## DELETE /danhgia/:id (onwer only)
 
 - request headers:
   - Authorization: <token>

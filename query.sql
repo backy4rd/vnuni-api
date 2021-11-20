@@ -47,18 +47,40 @@ CREATE TABLE khac
 CREATE TABLE quyen
 (
     id_quyen int IDENTITY(1,1) PRIMARY KEY,
-    ten_quyen varchar(64) not null
+    ten_quyen nvarchar(64) not null
 )
 
 CREATE TABLE nguoidung
 (
     username varchar(64) PRIMARY KEY,
-    password varchar(128) not null,
-    ho varchar(64),
-    ten varchar(64) not null,
+    password nvarchar(128) not null,
+    ho nvarchar(64),
+    ten nvarchar(64) not null,
 
     id_quyen int not null,
     FOREIGN key (id_quyen) REFERENCES quyen(id_quyen)
+)
+
+CREATE TABLE danhgia
+(
+    id_danh_gia int IDENTITY(1,1) PRIMARY KEY,
+    sao int not null CHECK(sao BETWEEN 0 AND 5),
+    danh_gia nvarchar(2000),
+    created_at datetime not null default CURRENT_TIMESTAMP,
+
+    username varchar(64) not null,
+    id_truong int not null,
+    FOREIGN key (id_truong) REFERENCES truong(id_truong),
+    FOREIGN key (username) REFERENCES nguoidung(username)
+)
+
+CREATE TABLE hinhanh
+(
+    id_hinh int IDENTITY(1,1) PRIMARY KEY,
+    url varchar(256) not null,
+
+    id_danh_gia int not null,
+    FOREIGN key (id_danh_gia) REFERENCES danhgia(id_danh_gia),
 )
 
 SET IDENTITY_INSERT quyen ON
@@ -470,11 +492,11 @@ SET IDENTITY_INSERT truong OFF
 GO
 
 CREATE FUNCTION [dbo].[geomToGeoJSON] (@geom GEOMETRY)
-RETURNS VARCHAR(MAX)
+RETURNS nvarchar(MAX)
 AS
 BEGIN
 -- Declare the return variable here
-    DECLARE @geoJSON VARCHAR(MAX)
+    DECLARE @geoJSON nvarchar(MAX)
 
 
     DECLARE @Ngeom GEOMETRY
