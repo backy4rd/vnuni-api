@@ -31,7 +31,9 @@ router.post(
     const id_truong = parseInt(req.body.id_truong);
     const sao = parseInt(req.body.sao);
     const danh_gia = req.body.danh_gia;
-    const hinh_anh = req.files.hinh_anh;
+    let hinh_anh = req.files.hinh_anh;
+
+    if (hinh_anh && !Array.isArray(hinh_anh)) hinh_anh = [hinh_anh]
 
     if (isNaN(sao) || sao > 5 || sao < 0) {
       return res.status(400).json({ fail: "so sao khong hop le (number, < 5, > 0" });

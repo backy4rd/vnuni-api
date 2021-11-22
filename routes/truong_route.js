@@ -35,7 +35,6 @@ router.get("/", async (req, res) => {
         "truong.id_truong"
       )
       .from("truong");
-    console.log(query.toString());
 
     if (truong) {
       query = query.andWhere("truong.tentruong", "like", `%${truong}%`);
@@ -217,7 +216,9 @@ router.get("/:id(\\d+)/danhgia", async (req, res) => {
       username: dgs[0].username,
       ho: dgs[0].ho,
       ten: dgs[0].ten,
-      hinh_anh: dgs.map((hinh) => ({ url: hinh.url, id_hinh: hinh.id_hinh })),
+      hinh_anh: dgs
+        .filter((hinh) => hinh.id_hinh !== null)
+        .map((hinh) => ({ url: hinh.url, id_hinh: hinh.id_hinh })),
     }))
     .value();
 

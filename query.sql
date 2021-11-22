@@ -65,7 +65,7 @@ CREATE TABLE danhgia
 (
     id_danh_gia int IDENTITY(1,1) PRIMARY KEY,
     sao int not null CHECK(sao BETWEEN 0 AND 5),
-    danh_gia nvarchar(2000),
+    danh_gia nvarchar(10000),
     created_at datetime not null default CURRENT_TIMESTAMP,
 
     username varchar(64) not null,

@@ -4,7 +4,8 @@
   "description": "vnuni",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed": "node ./seed/index.js"
   },
   "repository": {
     "type": "git",
@@ -24,10 +25,13 @@
   "homepage": "https://github.com/backy4rd/vnuni-backend#readme",
   "dependencies": {
     "@turf/turf": "^6.5.0",
+    "axios": "^0.24.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "form-data": "^4.0.0",
     "formidable": "^2.0.1",
+    "image-downloader": "^4.0.3",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.12",
     "lodash": "^4.17.21",
