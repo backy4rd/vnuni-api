@@ -88,7 +88,7 @@ async function main() {
     console.log(`${i}/${idTruongs.length} done`);
   }
 
-  process.exit(1)
+  process.exit(0)
 }
 
 setTimeout(main, 2000);
