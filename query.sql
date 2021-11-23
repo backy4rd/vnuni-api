@@ -34,7 +34,7 @@ CREATE TABLE truong
     id_tinh int not null,
     id_nhom int,
     FOREIGN KEY (id_tinh) REFERENCES tinh(id_tinh),
-    FOREIGN KEY (id_nhom) REFERENCES nhom(id_nhom)
+    FOREIGN KEY (id_nhom) REFERENCES nhom(id_nhom) ON DELETE CASCADE
 )
 
 CREATE TABLE khac
@@ -70,8 +70,8 @@ CREATE TABLE danhgia
 
     username varchar(64) not null,
     id_truong int not null,
-    FOREIGN key (id_truong) REFERENCES truong(id_truong),
-    FOREIGN key (username) REFERENCES nguoidung(username)
+    FOREIGN key (id_truong) REFERENCES truong(id_truong) ON DELETE CASCADE,
+    FOREIGN key (username) REFERENCES nguoidung(username) ON DELETE CASCADE
 )
 
 CREATE TABLE hinhanh
@@ -80,7 +80,7 @@ CREATE TABLE hinhanh
     url varchar(256) not null,
 
     id_danh_gia int not null,
-    FOREIGN key (id_danh_gia) REFERENCES danhgia(id_danh_gia),
+    FOREIGN key (id_danh_gia) REFERENCES danhgia(id_danh_gia) ON DELETE CASCADE
 )
 
 SET IDENTITY_INSERT quyen ON

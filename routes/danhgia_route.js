@@ -33,7 +33,7 @@ router.post(
     const danh_gia = req.body.danh_gia;
     let hinh_anh = req.files.hinh_anh;
 
-    if (hinh_anh && !Array.isArray(hinh_anh)) hinh_anh = [hinh_anh]
+    if (hinh_anh && !Array.isArray(hinh_anh)) hinh_anh = [hinh_anh];
 
     if (isNaN(sao) || sao > 5 || sao < 0) {
       return res.status(400).json({ fail: "so sao khong hop le (number, < 5, > 0" });
@@ -91,6 +91,11 @@ router.delete("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
   }
   if (danhgia.username !== req.auth.username) {
     return res.status(404).json({ fail: "khong the xoa danhgia cua nguoi khac" });
+  }
+
+  const hinhanh = await db("hinhanh").select("url").where("id_danh_gia", id);
+  for (const hinh of hinhanh) {
+    fs.unlink(path.join(mediaRoot, hinh.url.slice(hinh.url.lastIndexOf("/") + 1)), () => {});
   }
 
   try {

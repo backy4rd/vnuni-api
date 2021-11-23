@@ -1,7 +1,11 @@
+const fs = require("fs");
+const path = require("path");
 const _ = require("lodash");
 const express = require("express");
 const db = require("../database.js");
 const helpers = require("../helpers");
+
+const mediaRoot = path.join(__dirname, "../media");
 
 const router = express.Router();
 
@@ -130,13 +134,20 @@ router.delete("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
   if (req.auth.role !== "admin") {
     return res.status(400).json({ fail: "khong co quyen them truong" });
   }
+  if (!(await db("truong").where("id_truong", id).first())) {
+    res.status(404).json({ fail: "id_truong khong ton tai" });
+  }
+
+  const hinhanh = await db("danhgia")
+    .select("url")
+    .innerJoin("hinhanh", "hinhanh.id_danh_gia", "danhgia.id_danh_gia")
+    .where("id_truong", id);
+  for (const hinh of hinhanh) {
+    fs.unlink(path.join(mediaRoot, hinh.url.slice(hinh.url.lastIndexOf("/") + 1)), () => {});
+  }
 
   const rowAffected = await db("truong").where("id_truong", id).del();
-  if (rowAffected === 0) {
-    res.status(404).json({ fail: "đối tượng không tồn tại" });
-  } else {
-    res.status(200).json({ rowAffected });
-  }
+  res.status(200).json({ rowAffected });
 });
 
 router.put("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
