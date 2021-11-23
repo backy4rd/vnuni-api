@@ -80,15 +80,17 @@ async function main() {
   let i = 0;
   for (const idTruong of idTruongs) {
     const reviews = etc.takeRandomEleInArray(data.reviews, etc.randomRange(1, 10));
-    for (const review of reviews) {
-      const [token] = etc.takeRandomEleInArray(tokens, 1);
-      await createReview(idTruong, review, token);
-    }
+    await Promise.all(
+      reviews.map((review) => {
+        const [token] = etc.takeRandomEleInArray(tokens, 1);
+        return createReview(idTruong, review, token);
+      })
+    );
     i++;
     console.log(`${i}/${idTruongs.length} done`);
   }
 
-  process.exit(0)
+  process.exit(0);
 }
 
 setTimeout(main, 2000);
