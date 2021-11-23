@@ -96,7 +96,7 @@ router.post("/", helpers.authorizeMiddleware, async (req, res) => {
     return res.status(400).json({ fail: "coordination không hợp lệ [number, number]" });
   }
   if (id_nhom && !(await db("nhom").select(1).where("id_nhom", id_nhom))) {
-    return res.status(400).json({ fail: "id_nhom khong hop le" });
+    return res.status(400).json({ fail: "id_nhom khong ton tai" });
   }
   if (!helpers.searchTinh(coordinates)) {
     return res.status(400).json({ fail: "khong nham trong dia phan VN" });
