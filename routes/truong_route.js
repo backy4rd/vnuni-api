@@ -84,7 +84,9 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", helpers.authorizeMiddleware, async (req, res) => {
-  const { ten_truong, coordinates, mo_ta, id_nhom } = req.body;
+  const { coordinates, mo_ta } = req.body;
+  const id_nhom = req.body.id_nhom || undefined
+  const ten_truong =  req.body.ten_truong || undefined;
 
   if (req.auth.role !== "admin") {
     return res.status(400).json({ fail: "khong co quyen them truong" });
@@ -152,7 +154,9 @@ router.delete("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
 
 router.put("/:id(\\d+)", helpers.authorizeMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { ten_truong, coordinates, mo_ta, id_nhom } = req.body;
+  const { coordinates, mo_ta } = req.body;
+  const id_nhom = req.body.id_nhom || undefined
+  const ten_truong =  req.body.ten_truong || undefined;
 
   if (req.auth.role !== "admin") {
     return res.status(400).json({ fail: "khong co quyen them truong" });
