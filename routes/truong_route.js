@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
         "tinh.ten_tinh",
         "dg.sao"
       )
-      .innerJoin("nhom", "nhom.id_nhom", "truong.id_nhom")
+      .leftJoin("nhom", "nhom.id_nhom", "truong.id_nhom")
       .innerJoin("tinh", "tinh.id_tinh", "truong.id_tinh")
       .innerJoin("mien", "mien.id_mien", "tinh.id_mien")
       .leftJoin(
