@@ -17,6 +17,7 @@ router.get("/", async (req, res) => {
       .select(
         "truong.id_truong",
         "truong.tentruong",
+        "truong.mo_ta",
         "toado.STY AS lat",
         "toado.STX AS long",
         "mien.id_mien",
@@ -69,6 +70,7 @@ router.get("/", async (req, res) => {
           tennhom: r.ten_nhom || undefined,
           tentinh: r.ten_tinh || undefined,
           tenmien: r.ten_mien || undefined,
+          mota: r.mo_ta,
           id_tinh: r.id_tinh,
           id_nhom: r.id_nhom,
           sao: r.sao,

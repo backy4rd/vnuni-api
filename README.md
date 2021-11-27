@@ -56,6 +56,7 @@
         ten_nhom: string,
         id_tinh: number,
         ten_tinh: string,
+        mo_ta: string,
         sao: number
     }>,
     geojson: {
@@ -71,6 +72,7 @@
                 tennhom: string,
                 tentinh: string,
                 tenmien: string,
+                mota: string,
                 id_nhom: number,
                 id_tinh: number,
                 sao: number
