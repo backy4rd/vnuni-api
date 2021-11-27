@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
         "truong.id_truong",
         "truong.tentruong",
         "truong.mo_ta",
-        "toado.STY AS lat",
-        "toado.STX AS long",
+        "toado.STY AS long",
+        "toado.STX AS lat",
         "mien.id_mien",
         "mien.ten_mien",
         "nhom.id_nhom",
@@ -63,7 +63,7 @@ router.get("/", async (req, res) => {
         type: "Feature",
         geometry: {
           type: "Point",
-          coordinates: [r.long, r.lat],
+          coordinates: [r.lat, r.long],
         },
         properties: {
           tentruong: r.tentruong,
