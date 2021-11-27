@@ -44,7 +44,6 @@ router.post("/", async (req, res) => {
     const [{ valid }] = await db.select(db.raw(`${STGeomFromText}.STIsValid() AS valid`));
     if (!valid) throw new Error();
 
-    console.log(STGeomFromText);
     const data = await db
       .insert({
         toado: db.raw(STGeomFromText),

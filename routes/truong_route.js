@@ -17,8 +17,7 @@ router.get("/", async (req, res) => {
       .select(
         "truong.id_truong",
         "truong.tentruong",
-        "toado.STY AS lat",
-        "toado.STX AS long",
+        db.raw("dbo.geomToGeoJSON(toado) AS geometry"),
         "mien.id_mien",
         "mien.ten_mien",
         "nhom.id_nhom",
@@ -60,19 +59,8 @@ router.get("/", async (req, res) => {
       type: "FeatureCollection",
       features: data.map((r) => ({
         type: "Feature",
-        geometry: {
-          type: "Point",
-          coordinates: [r.long, r.lat],
-        },
-        properties: {
-          tentruong: r.tentruong,
-          tennhom: r.ten_nhom || undefined,
-          tentinh: r.ten_tinh || undefined,
-          tenmien: r.ten_mien || undefined,
-          id_tinh: r.id_tinh,
-          id_nhom: r.id_nhom,
-          sao: r.sao,
-        },
+        geometry: JSON.parse(r.geometry),
+        properties: r
       })),
     };
 

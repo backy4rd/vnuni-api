@@ -36,7 +36,8 @@ module.exports.convertToSTGeomFromText = (type, coordinates) => {
   return STGeomFromText && `geometry::STGeomFromText('${STGeomFromText}', 0)`;
 };
 
-module.exports.searchTinh = (coordinate) => {
+module.exports.searchTinh = (_coordinate) => {
+  const coordinate = [..._coordinate].reverse();
   for (const feature of VNGeoJSON.features) {
     try {
       const point = turf.point(coordinate);
