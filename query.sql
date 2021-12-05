@@ -42,6 +42,7 @@ CREATE TABLE khac
     id int IDENTITY(1,1) PRIMARY KEY,
     mota nvarchar(2000),
     toado geometry,
+    username varchar(64),
 )
 
 CREATE TABLE quyen
